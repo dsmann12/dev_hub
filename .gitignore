@@ -1,0 +1,5 @@
+# virtual environment
+.venv
+
+# database file
+db.sqlite3
