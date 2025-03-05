@@ -3,3 +3,10 @@
 
 # database file
 db.sqlite3
+
+# environment variables
+.env
+
+# python cache and pyc
+__pycache__
+*.pyc
