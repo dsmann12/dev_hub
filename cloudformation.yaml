@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudFormation template for an Ubuntu 24.04 EC2 instance with Docker and security group setup"
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: "The existing default VPC ID"
+
+  KeyName:
+    Description: "Name of an existing EC2 KeyPair to allow SSH access"
+    Type: "AWS::EC2::KeyPair::KeyName"
+
+Resources:
+  GitHubOIDCProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: "https://token.actions.githubusercontent.com"
+      ClientIdList:
+        - "sts.amazonaws.com"
+      ThumbprintList:
+        - "74f3a68f16524f15424927704c9506f55a9316bd"  # GitHub’s root CA thumbprint
+
+  GithubActionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: GithubActionsDeployRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: arn:aws:iam::390402560704:oidc-provider/token.actions.githubusercontent.com
+            Action: "sts:AssumeRoleWithWebIdentity"
+            Condition:
+              StringEquals:
+                "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+              StringLike:
+                "token.actions.githubusercontent.com:sub": "repo:dsmann12/dev_hub:*"
+      Policies:
+        - PolicyName: GithubActionsDeployPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "s3:*"
+                  - "cloudformation:*"
+                  - "ec2:*"
+                  - "iam:PassRole"
+                Resource: "*"
+
+  WebServerSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Allow SSH, HTTP, and HTTPS access"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0  # Allow SSH from anywhere
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0  # Allow HTTP from anywhere
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0  # Allow HTTPS from anywhere
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0  # Allow all outbound traffic
+
+  WebServerEC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      InstanceType: "t2.micro"
+      ImageId: "ami-04b4f1a9cf54c11d0"
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !Ref WebServerSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -e  # Exit on error
+
+          # Update and install Docker
+          apt-get update -y
+          apt-get install -y docker.io
+          systemctl enable docker
+          systemctl start docker
+          usermod -aG docker ubuntu  # Add the default user to the Docker group
+
+          echo "Docker installed successfully."
+
+          # Install Docker Compose
+          mkdir -p /usr/lib/docker/cli-plugins
+          curl -L "https://github.com/docker/compose/releases/download/v2.33.1/docker-compose-linux-x86_64" -o /usr/lib/docker/cli-plugins/docker-compose
+          chmod +x /usr/lib/docker/cli-plugins/docker-compose
+
+          # Verify installation
+          docker --version
+          docker compose version
+
+          echo "Docker Compose installed successfully."
+      Tags:
+        - Key: "Name"
+          Value: "Ubuntu24-Docker-Instance"
+
+Outputs:
+  InstanceId:
+    Description: "ID of the created EC2 instance"
+    Value: !Ref WebServerEC2Instance
+  PublicIp:
+    Description: "Public IP of the instance"
+    Value: !GetAtt WebServerEC2Instance.PublicIp
