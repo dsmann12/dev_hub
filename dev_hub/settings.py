@@ -27,7 +27,7 @@ SECRET_KEY = os.environ['DEV_HUB_DJANGO_SECRET']
 # DEBUG = os.getenv("DEV_HUB_DEBUG", "false") == "true"
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ['DEV_HUB_ALLOWED_HOSTS'].split(",")
 
 
 # Application definition
