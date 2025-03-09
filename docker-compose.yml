@@ -25,6 +25,10 @@ services:
     depends_on:
       - web
     restart: always
+  
+networks:
+  default:
+    name: dev_hub
 
 volumes:
   static_volume:
