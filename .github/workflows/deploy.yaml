@@ -80,6 +80,21 @@ jobs:
             docker compose up -d --build
           EOF
       
+      - name: Wait for the web server to be ready (with timeout)
+        run: |
+          timeout=60  # Timeout after 60 seconds
+          elapsed=0
+          while ! curl --silent --head --fail http://${{ env.EC2_PUBLIC_IP }}; do
+            if [ $elapsed -ge $timeout ]; then
+              echo "Timeout reached, web server is not up after $timeout seconds."
+              exit 1  # Fail the step
+            fi
+            echo "Waiting for web server to be ready... $elapsed seconds elapsed."
+            sleep 5
+            ((elapsed+=5))
+          done
+          echo "Web server is up and running!"
+      
       - name: Run Acceptance Tests On Deployed App
         run: |
           python manage.py test core.tests.CoreAcceptanceTests
