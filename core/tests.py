@@ -1,26 +1,32 @@
 
 # Create your tests here.
+from abc import ABC, abstractmethod
 import os
+import unittest
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from playwright.sync_api import sync_playwright
 
-class CoreEndToEndTests(StaticLiveServerTestCase):
+class CoreE2EBaseTests(ABC):
+    """Abstract class containing E2E tests for core app
+    
+    Inheriting classes should implement their setUpClass and tearDownClass
+    methods
+    """
     @classmethod
+    @abstractmethod
     def setUpClass(cls):
-        os.environ["DJANGO_SETTINGS_MODULE"] = "dev_hub.settings"
-        os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
-        super().setUpClass()
-        cls.playwright = sync_playwright().start()
-        cls.browser = cls.playwright.chromium.launch()
+        raise NotImplementedError("Implement setUpClass in base classes")
 
     @classmethod
+    @abstractmethod
     def tearDownClass(cls):
-        super().tearDownClass()
-        cls.browser.close()
-        cls.playwright.stop()
+        # super().tearDownClass()
+        # cls.browser.close()
+        # cls.playwright.stop()
+        raise NotImplementedError("Implement tearDownClass in base classes")
 
-    def test_root_url_status(self):
+    def test_root_url_status_is_200(self):
         """Test the root URL returns a successful status (200)."""
         # Arrange
         page = self.browser.new_page()
@@ -35,7 +41,7 @@ class CoreEndToEndTests(StaticLiveServerTestCase):
         # Clean
         page.close()
 
-    def test_root_url_title(self):
+    def test_root_url_title_contains_my_name(self):
         """Test the root URL contains the correct title."""
         # Arrange
         page = self.browser.new_page()
@@ -58,7 +64,7 @@ class CoreEndToEndTests(StaticLiveServerTestCase):
         self.assertTrue(intro_section.count() > 0, "Expected an intro section with id 'intro'")
         page.close()
 
-    def test_section_headings(self):
+    def test_expected_section_headings_exist(self):
         """Test that required section headings exist on the page."""
         page = self.browser.new_page()
         page.goto(f"{self.live_server_url}/")
@@ -74,22 +80,22 @@ class CoreEndToEndTests(StaticLiveServerTestCase):
         
         page.close()
 
-    def test_languages_section(self):
-        self._test_list_section("Languages", self.get_expected_languages())
+    def test_languages_section_contains_expected_languages(self):
+        self._test_list_section_contains_values("Languages", self.get_expected_languages())
 
-    def test_frameworks_section(self):
-        self._test_list_section("Frameworks", self.get_expected_frameworks())
+    def test_frameworks_section_contains_expected_frameworks(self):
+        self._test_list_section_contains_values("Frameworks", self.get_expected_frameworks())
 
-    def test_aws_section(self):
-        self._test_list_section("AWS", self.get_expected_aws())
+    def test_aws_section_contains_expected_aws_services(self):
+        self._test_list_section_contains_values("AWS", self.get_expected_aws_services())
 
-    def test_tools_section(self):
-        self._test_list_section("Tools", self.get_expected_tools())
+    def test_tools_section_contains_expected_tools(self):
+        self._test_list_section_contains_values("Tools", self.get_expected_tools())
 
-    def test_automation_section(self):
-        self._test_list_section("Automation", self.get_expected_automation())
+    def test_automation_section_contains_expected_automation_tools(self):
+        self._test_list_section_contains_values("Automation", self.get_expected_automation_tools())
 
-    def _test_list_section(self, section_name, expected_items):
+    def _test_list_section_contains_values(self, section_name, expected_items):
         """Helper to test list-based sections."""
         page = self.browser.new_page()
         page.goto(f"{self.live_server_url}/")
@@ -115,7 +121,7 @@ class CoreEndToEndTests(StaticLiveServerTestCase):
         return ["React", "Django", "LangChain", "Express", "Next.js", "vite"]
 
     @staticmethod
-    def get_expected_aws():
+    def get_expected_aws_services():
         return [
             "EC2", "Lambda", "API Gateway", "DynamoDB", "RDS",
             "ECS", "OpenSearch", "Bedrock", "CloudFormation"
@@ -129,5 +135,35 @@ class CoreEndToEndTests(StaticLiveServerTestCase):
         ]
 
     @staticmethod
-    def get_expected_automation():
+    def get_expected_automation_tools():
         return ["Automation Anywhere", "Power Apps", "Power Automate", "Power BI"]
+
+
+
+class CoreE2ELocalTests(CoreE2EBaseTests, StaticLiveServerTestCase):
+    @classmethod
+    def setUpClass(cls):
+        os.environ["DJANGO_SETTINGS_MODULE"] = "dev_hub.settings"
+        os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+        StaticLiveServerTestCase.setUpClass()
+        cls.playwright = sync_playwright().start()
+        cls.browser = cls.playwright.chromium.launch()
+
+    @classmethod
+    def tearDownClass(cls):
+        StaticLiveServerTestCase.tearDownClass()
+        cls.browser.close()
+        cls.playwright.stop()
+
+
+class CoreAcceptanceTests(CoreE2EBaseTests, unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.playwright = sync_playwright().start()
+        cls.browser = cls.playwright.chromium.launch()
+        cls.live_server_url = os.environ['ACCEPTANCE_TEST_SERVER_URL']
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.browser.close()
+        cls.playwright.stop()
