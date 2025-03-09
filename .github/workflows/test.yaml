@@ -1,7 +1,7 @@
 on:
   push:
-    branches:
-      - '**' # Runs on push to any branch
+    branches-ignore:
+      - 'main' # Don't run this on main branch. Will be run with deploy workflow
   pull_request: # Runs when a PR is created or updated
   workflow_call:
   workflow_dispatch:
