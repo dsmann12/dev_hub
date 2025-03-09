@@ -3,6 +3,8 @@ on:
     branches:
       - '**' # Runs on push to any branch
   pull_request: # Runs when a PR is created or updated
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
   test:
