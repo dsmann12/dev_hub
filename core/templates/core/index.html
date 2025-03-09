@@ -1,0 +1,203 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>David Scheuermann</title>
+    <!-- <link rel="stylesheet" href="new_style.css"> -->
+     <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Menu Top Bar -->
+    <header>
+        <a class="logo" href=""><span class="accent">[</span>david<span class="accent">]</span></a>
+        <!-- <nav class="menu">
+            <ul>
+                <li><a href="{% url 'index' %}">Home</a></li>
+                <li><a href="">About</a></li>
+                <li><a href="">Blog</a></li>
+            </ul>
+        </nav> -->
+    </header>
+
+    <main>
+        <section id="intro">
+            <p>
+                My name is David Scheuermann
+                <br>
+                I am a software developer.
+            </p>
+        </section>
+
+        <section>
+            <h4>EXPERIENCE</h4>
+            <article>
+                <section class="work_history_item">
+                    <h4>AI Software Engineer III</h4>
+                    <div>[2024-Present]</div>
+                </section>
+                <section>
+                    <ul>
+                        <li>
+                            Led development of a chatbot utilizing Retrieval Augmented Generation (RAG) and Agentic AI to answer questions about company policies and information. Developed on AWS with Python and React.
+                        </li>
+                        <li>
+                            Built the CI/CD pipeline for the project utilizing GitHub Actions with thorough automated testing through multi-stage deployments. Shared knowledge of CI/CD and testing with my department.
+                        </li>
+                        <li>
+                            Responsible for building and managing the infrastructure through Infrastructure as Code (IaC) with AWS Serverless Application Model (SAM) and CloudFormation.
+                        </li>
+                        <li>
+                            Minor contributions to the frontend developed with React and TypeScript 
+                        </li>
+                        <li>
+                            Empowered new and junior developers to safely contribute through pair programming sessions
+                        </li>
+                    </ul>
+                </section>
+            </article>
+            <article>
+                <section class="work_history_item">
+                    <h4>Automation Analyst III</h4>
+                    <div>[2022-2024]</div>
+                </section>
+                <section>
+                    <ul>
+                        <li>
+                            Developed 5 applications to capture Nuclear regulatory data, track their approvals, and automatically release a mandatory monthly report to all stakeholders, saving over $1 million annually.
+                        </li>
+                        <li>
+                            Developed applications using Microsoft Power Apps to supply an intuitive UI quickly. Created and managed a Microsoft SQL Server database to store and serve complex relational data for the applications and reports. Developed notification and approval systems using Microsoft Power Automate.
+                        </li>
+                        <li>
+                            Heavily involved in client discussions when gathering requirements and project management
+                        </li>
+                    </ul>
+                </section>
+            </article>
+            <article>
+                <section class="work_history_item">
+                    <h4>Automation Analyst II</h4>
+                    <div>[2020-2022]</div>
+                </section>
+                <section>
+                    <ul>
+                        <li>
+                            Developed a .NET DLL allowing Automation Anywhere RPA bots to programmatically interact with Microsoft Excel files for various tasks, allowing RPA developers to develop more quickly and reliably.
+                        </li>
+                        <li>
+                            Instrumental in initiating development of a shared library of automation code for various applications within the company. Led monthly meetings to foster discussion and track progress of development
+                        </li>
+                    </ul>
+                </section>
+            </article>
+            <article>
+                <section class="work_history_item">
+                    <h4>RPA Developer Intern</h4>
+                    <div>[2018-2020]</div>
+                </section>
+                <section>
+                    <ul>
+                        <li>
+                            Developed multiple RPA bots using Automation Anywhere and .NET to automate various tasks within the company, saving multiple FTEs worth of time annually and freeing employees for higher priority work
+                        </li>
+                    </ul>
+                </section>
+            </article>
+        </section>
+
+        <section>
+            <h4>LANGUAGES</h4>
+            <ul>
+                <li>Python</li>
+                <li>TypeScript</li>
+                <li>JavaScript</li>
+                <li>C#</li>
+                <li>HTML</li>
+                <li>SQL</li>
+            </ul>
+
+        </section>
+
+        <section>
+            <h4>FRAMEWORKS</h4>
+            <ul>
+                <li>React</li>
+                <li>Django</li>
+                <li>LangChain</li>
+                <li>Express</li>
+                <li>Next.js</li>
+                <li>vite</li>
+            </ul>
+
+        </section>
+
+        <section>
+            <h4>AWS</h4>
+            <ul>
+                <li>EC2</li>
+                <li>Lambda</li>
+                <li>API Gateway</li>
+                <li>DynamoDB</li>
+                <li>RDS</li>
+                <li>ECS</li>
+                <li>OpenSearch</li>
+                <li>Bedrock</li>
+                <li>CloudFormation</li>
+
+            </ul>
+
+        </section>
+
+
+        <section>
+            <h4>TOOLS</h4>
+            <ul>
+                <li>git</li>
+                <li>PostgreSQL</li>
+                <li>SQL Server</li>
+                <li>Docker</li>
+                <li>AWS Serverless Application Model (SAM)</li>
+                <li>pytest</li>
+                <li>Visual Studio</li>
+                <li>Visual Studio Code</li>
+                <li>vim</li>
+            </ul>
+
+        </section>
+
+        <section>
+            <h4>AUTOMATION</h4>
+            <ul>
+                <li>Automation Anywhere</li>
+                <li>Power Apps</li>
+                <li>Power Automate</li>
+                <li>Power BI</li>
+            </ul>
+        </section>
+
+
+        <section>
+            <h4>CONTACT</h4>
+            <a href="">GITHUB</a>
+            <a href="">MASTODON</a>
+            <a href="">TWITTER</a>
+            <a href="">LINKEDIN</a>
+            <a href="">EMAIL</a>
+        </section>
+
+        <section style="margin-top: 20px">
+            <a href="">C.V.</a>
+        </section>
+
+    </main>
+</body>
+
+</html>

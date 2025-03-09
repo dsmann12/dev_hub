@@ -1,0 +1,118 @@
+@font-face {
+    font-family: 'iAWriterDuo';
+    src: url('/static/core/font/ia-writer-duo/iAWriterDuospace-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'iAWriterDuo';
+    src: url('/static/core/font/ia-writer-duo/iAWriterDuospace-Bold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+html {
+    font-size: 16px
+}
+
+/* Apply to elements */
+body {
+    font-family: 'iAWriterDuo', sans-serif;
+    /* background-color: #11111A;
+    color: #DDDDDD; */
+    color: #11111A;
+    background-color: #DDDDDD;
+    margin: auto 25%;
+}
+
+@media screen and (max-width: 812px) {
+    html {
+        font-size: 14px;
+    }
+
+    body {
+        margin: 8px;
+    }
+
+    /* .long_media_thumbnail {
+        width: 82.5px !important;
+        height: 123.75px !important;
+    } */
+}
+
+
+
+.logo {
+    /* font-size: 2.5rem; */
+    font-weight: 700;
+    /* color: #DDDDDD; */
+    color: #11111A;
+    text-decoration: none;
+    margin: 16px 0;
+}
+
+.accent {
+    /* color: #85dae9; */
+    /* color: #DDDDDD; */
+    color: #11111A;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.menu ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 16px 0;
+}
+
+.menu ul li {
+    margin-left: 10px;
+}
+
+.menu ul li a {
+    /* color: #DDDDDD; */
+    color: #11111A;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.blog_post_link, .work_history_item {
+    display: flex;
+    justify-content: space-between;
+}
+
+.blog_post_link h4, .work_history_item h4 {
+    margin-top: 0;
+    font-size: 1rem;
+    /* min-width: 70%; */
+    max-width: 70%;
+}
+
+.blog_post_link div, .work_history_item div {
+    padding-left: 0.5rem;
+    font-size: 1rem;
+}
+
+/* .long_media_thumbnail {
+    width: 150px;
+    height: 225px;
+} */
+
+.media-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 0;
+    list-style: none /* Show numbers inside the grid */
+}
+
+/* Ensure images scale properly */
+.media-grid img {
+    width: 100%;
+    height: 100%;
+}
