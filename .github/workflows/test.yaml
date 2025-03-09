@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
+      id-token: none
       contents: read
     env:
       DEV_HUB_DJANGO_SECRET: ${{ secrets.DEV_HUB_DJANGO_SECRET }}
