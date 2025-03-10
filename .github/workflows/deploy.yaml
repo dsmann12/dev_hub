@@ -44,7 +44,7 @@ jobs:
             --template-file cloudformation.yaml \
             --stack-name dev-hub \
             --capabilities CAPABILITY_NAMED_IAM \
-            --parameter-overrides VpcId=vpc-0dba77117c2b67537 KeyName=personal-server
+            --parameter-overrides VpcId=vpc-0dba77117c2b67537 KeyName=personal-server Domain=${{ vars.DOMAIN }} WebServerHostedZoneId=${{ secrets.HOSTED_ZONE_ID }}
 
       - name: Get EC2 Public IP
         run: |
