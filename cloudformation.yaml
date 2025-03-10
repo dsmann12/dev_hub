@@ -10,6 +10,10 @@ Parameters:
     Description: "Name of an existing EC2 KeyPair to allow SSH access"
     Type: "AWS::EC2::KeyPair::KeyName"
 
+  Domain:
+    Description: "The domain name for the web server"
+    Type: String
+
 Resources:
   GitHubOIDCProvider:
     Type: AWS::IAM::OIDCProvider
@@ -106,6 +110,21 @@ Resources:
       Tags:
         - Key: "Name"
           Value: "Ubuntu24-Docker-Instance"
+      
+  WebServerHostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Ref Domain  # Your domain name
+    
+  WebServerDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref WebServerHostedZone
+      Name: !Ref Domain  # The subdomain or root domain you want to configure
+      Type: A
+      TTL: '300'
+      ResourceRecords:
+        - !GetAtt WebServerEC2Instance.PublicIp  # Use EC2 public IP directly
 
 Outputs:
   InstanceId:
