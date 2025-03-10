@@ -19,6 +19,7 @@ jobs:
       DEV_HUB_DJANGO_SECRET: ${{ secrets.DEV_HUB_DJANGO_SECRET }}
       DEV_HUB_DEBUG: ${{ secrets.DEV_HUB_DEBUG }}
       DEV_HUB_ALLOWED_HOSTS: localhost,127.0.0.1
+      DOMAIN: ${{ vars.DOMAIN }}
 
     steps:
       - name: Checkout code
@@ -68,6 +69,7 @@ jobs:
           echo "DEV_HUB_DJANGO_SECRET=${{ secrets.DEV_HUB_DJANGO_SECRET }}" > .env
           echo "DEV_HUB_DEBUG=${{ secrets.DEV_HUB_DEBUG }}" >> .env
           echo "DEV_HUB_ALLOWED_HOSTS=${{ vars.DEV_HUB_ALLOWED_HOSTS }}" >> .env
+          echo "DOMAIN=${{ vars.DOMAIN }}" >> .env
 
       - name: Copy .env file to EC2
         run: scp -o StrictHostKeyChecking=no -i private-key.pem .env ubuntu@${{ env.EC2_PUBLIC_IP }}:/home/ubuntu/dev_hub/.env
