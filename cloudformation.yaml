@@ -100,7 +100,7 @@ Resources:
 
           # Update and install Docker
           apt-get update -y
-          apt-get install -y docker.io
+          apt-get install -y docker.io python3-venv libaugeas0
           systemctl enable docker
           systemctl start docker
           usermod -aG docker ubuntu  # Add the default user to the Docker group
@@ -117,6 +117,17 @@ Resources:
           docker compose version
 
           echo "Docker Compose installed successfully."
+
+          # Install Certbot
+          apt-get install -y python3-venv libaugeas0
+          python3 -m venv /opt/certbot/
+          /opt/certbot/bin/pip install --upgrade pip
+          /opt/certbot/bin/pip install certbot certbot-nginx
+          ln -s /opt/certbot/bin/certbot /usr/bin/certbot
+          certbot certonly --standalone -d ${Domain} --agree-tos --email david.scheuermann3@gmail.com --non-interactive
+          # Add cron job to update cert
+          echo "0 0,12 * * * root /opt/certbot/bin/python -c 'import random; import time; time.sleep(random.random() * 3600)' && sudo certbot renew -q" | sudo tee -a /etc/crontab > /dev/null
+          set DOMAIN=${Domain}
       Tags:
         - Key: "Name"
           Value: "Ubuntu24-Docker-Instance"
