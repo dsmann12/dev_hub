@@ -204,7 +204,7 @@ class CoreE2EBaseTests(ABC):
             (
                 "Automation Analyst II", "[2020-2022]",
                 [
-                    "Developed a .NET DLL allowing Automation Anywhere RPA bots to programmatically interact with Microsoft Excel files for various tasks, allowing RPA developers to develop more quickly and reliably.",
+                    "Developed a .NET DLL allowing Automation Anywhere RPA bots to programmatically interact with Microsoft Excel files for various tasks, allowing RPA developers to develop quicker and more reliably.",
                     "Instrumental in initiating development of a shared library of automation code for various applications within the company. Led monthly meetings to foster discussion and track progress of development",
                 ]
             ),
