@@ -53,7 +53,7 @@ jobs:
 
       - name: Set Acceptance Test Server URL Environment Variable to EC2 Public IP
         run: |
-          echo "ACCEPTANCE_TEST_SERVER_URL=https://${{ env.EC2_PUBLIC_IP }}" >> $GITHUB_ENV
+          echo "ACCEPTANCE_TEST_SERVER_URL=https://${{ vars.DOMAIN }}" >> $GITHUB_ENV
 
       - name: Set up SSH key
         run: |
@@ -62,7 +62,7 @@ jobs:
 
       - name: Copy repository to EC2
         run: |
-          rsync -avz -e "ssh -i private-key.pem -o StrictHostKeyChecking=no" --exclude '.git' ./ ubuntu@${{ env.EC2_PUBLIC_IP }}:/home/ubuntu/dev_hub
+          rsync -avz -e "ssh -i private-key.pem -o StrictHostKeyChecking=no" --exclude '.git' ./ ubuntu@${{ vars.DOMAIN }}:/home/ubuntu/dev_hub
 
       - name: Create .env file locally
         run: |
@@ -72,11 +72,11 @@ jobs:
           echo "DOMAIN=${{ vars.DOMAIN }}" >> .env
 
       - name: Copy .env file to EC2
-        run: scp -o StrictHostKeyChecking=no -i private-key.pem .env ubuntu@${{ env.EC2_PUBLIC_IP }}:/home/ubuntu/dev_hub/.env
+        run: scp -o StrictHostKeyChecking=no -i private-key.pem .env ubuntu@${{ vars.DOMAIN }}:/home/ubuntu/dev_hub/.env
 
       - name: Start Docker containers
         run: |
-          ssh -o StrictHostKeyChecking=no -i private-key.pem ubuntu@${{ env.EC2_PUBLIC_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i private-key.pem ubuntu@${{ vars.DOMAIN }} << 'EOF'
             cd /home/ubuntu/dev_hub
             docker compose down
             docker compose up -d --build
@@ -86,7 +86,7 @@ jobs:
         run: |
           timeout=60  # Timeout after 60 seconds
           elapsed=0
-          while ! curl --silent --head --fail https://${{ env.EC2_PUBLIC_IP }}; do
+          while ! curl --silent --head --fail https://${{ vars.DOMAIN }}; do
             if [ $elapsed -ge $timeout ]; then
               echo "Timeout reached, web server is not up after $timeout seconds."
               exit 1  # Fail the step
