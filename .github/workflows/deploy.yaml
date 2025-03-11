@@ -53,7 +53,7 @@ jobs:
 
       - name: Set Acceptance Test Server URL Environment Variable to EC2 Public IP
         run: |
-          echo "ACCEPTANCE_TEST_SERVER_URL=http://${{ env.EC2_PUBLIC_IP }}" >> $GITHUB_ENV
+          echo "ACCEPTANCE_TEST_SERVER_URL=https://${{ env.EC2_PUBLIC_IP }}" >> $GITHUB_ENV
 
       - name: Set up SSH key
         run: |
@@ -86,7 +86,7 @@ jobs:
         run: |
           timeout=60  # Timeout after 60 seconds
           elapsed=0
-          while ! curl --silent --head --fail http://${{ env.EC2_PUBLIC_IP }}; do
+          while ! curl --silent --head --fail https://${{ env.EC2_PUBLIC_IP }}; do
             if [ $elapsed -ge $timeout ]; then
               echo "Timeout reached, web server is not up after $timeout seconds."
               exit 1  # Fail the step
