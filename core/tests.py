@@ -5,7 +5,7 @@ import os
 import unittest
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Page, Browser, BrowserContext
 
 class CoreE2EBaseTests(ABC):
     """Abstract class containing E2E tests for core app
@@ -13,6 +13,13 @@ class CoreE2EBaseTests(ABC):
     Inheriting classes should implement their setUpClass and tearDownClass
     methods
     """
+    """I want to say my ABC has a browser and context variable in its implementing class.
+    How can I do that?
+    """
+    live_server_url: str    
+    browser: Browser
+    context: BrowserContext
+
     @classmethod
     @abstractmethod
     def setUpClass(cls):
@@ -29,7 +36,7 @@ class CoreE2EBaseTests(ABC):
     def test_root_url_status_is_200(self):
         """Test the root URL returns a successful status (200)."""
         # Arrange
-        page = self.browser.new_page()
+        page = self.context.new_page()
 
         # Act
         response = page.goto(f"{self.live_server_url}/")
@@ -44,7 +51,7 @@ class CoreE2EBaseTests(ABC):
     def test_root_url_title_contains_my_name(self):
         """Test the root URL contains the correct title."""
         # Arrange
-        page = self.browser.new_page()
+        page = self.context.new_page()
 
         # Act
         page.goto(f"{self.live_server_url}/")
@@ -58,7 +65,7 @@ class CoreE2EBaseTests(ABC):
 
     def test_intro_section_exists(self):
         """Test that the intro section exists."""
-        page = self.browser.new_page()
+        page = self.context.new_page()
         page.goto(f"{self.live_server_url}/")
         intro_section = page.locator("section#intro")
         self.assertTrue(intro_section.count() > 0, "Expected an intro section with id 'intro'")
@@ -66,7 +73,7 @@ class CoreE2EBaseTests(ABC):
 
     def test_expected_section_headings_exist(self):
         """Test that required section headings exist on the page."""
-        page = self.browser.new_page()
+        page = self.context.new_page()
         page.goto(f"{self.live_server_url}/")
         
         expected_sections = [
@@ -84,7 +91,7 @@ class CoreE2EBaseTests(ABC):
         """Helper to test the work experience section."""
         # Arrange
         expected_experience = self.get_expected_work_experience()
-        page = self.browser.new_page()
+        page = self.context.new_page()
 
         # Act
         page.goto(f"{self.live_server_url}/")
@@ -122,7 +129,7 @@ class CoreE2EBaseTests(ABC):
     def _test_list_section_contains_values(self, section_name, expected_items):
         """Helper to test list-based sections."""
         # Arrange
-        page = self.browser.new_page()
+        page = self.context.new_page()
 
         ## act
         page.goto(f"{self.live_server_url}/")
@@ -137,7 +144,7 @@ class CoreE2EBaseTests(ABC):
     def test_contact_section_contains_expected_links(self):
         # Arrange
         expected_contact_links = self.get_expected_contact_links()
-        page = self.browser.new_page()
+        page = self.context.new_page()
 
         # Act
         page.goto(f"{self.live_server_url}/")
@@ -158,7 +165,7 @@ class CoreE2EBaseTests(ABC):
     def test_cv_section_contains_expected_link(self):
         # Arrange
         expected_link = self.get_expected_cv_link()
-        page = self.browser.new_page()
+        page = self.context.new_page()
 
         # Act
         page.goto(f"{self.live_server_url}/")
@@ -258,7 +265,7 @@ class CoreE2EBaseTests(ABC):
         return "https://drive.google.com/file/d/1MwEGpyhif-bm99qETTHrDYSVexKZcABH/view?usp=drive_link"
 
 
-class CoreE2ELocalTests(CoreE2EBaseTests, StaticLiveServerTestCase):
+class CoreE2ETests(CoreE2EBaseTests, StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         os.environ["DJANGO_SETTINGS_MODULE"] = "dev_hub.settings"
@@ -266,10 +273,12 @@ class CoreE2ELocalTests(CoreE2EBaseTests, StaticLiveServerTestCase):
         StaticLiveServerTestCase.setUpClass()
         cls.playwright = sync_playwright().start()
         cls.browser = cls.playwright.chromium.launch()
+        cls.context = cls.browser.new_context()
 
     @classmethod
     def tearDownClass(cls):
         StaticLiveServerTestCase.tearDownClass()
+        cls.context.close()
         cls.browser.close()
         cls.playwright.stop()
 
@@ -277,11 +286,19 @@ class CoreE2ELocalTests(CoreE2EBaseTests, StaticLiveServerTestCase):
 class CoreAcceptanceTests(CoreE2EBaseTests, unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # Check whether to ignore HTTPS errors for local dev
+        # var is PLAYWRIGHT_IGNORE_HTTPS_ERRORS
+        ignore_https_errors = (
+            os.environ.get('PLAYWRIGHT_IGNORE_HTTPS_ERRORS', 'false').lower() == 'true'
+        )
+
         cls.playwright = sync_playwright().start()
         cls.browser = cls.playwright.chromium.launch()
+        cls.context = cls.browser.new_context(ignore_https_errors=ignore_https_errors)
         cls.live_server_url = os.environ['ACCEPTANCE_TEST_SERVER_URL']
 
     @classmethod
     def tearDownClass(cls):
+        cls.context.close()
         cls.browser.close()
         cls.playwright.stop()
