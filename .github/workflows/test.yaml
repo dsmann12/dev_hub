@@ -14,9 +14,16 @@ jobs:
       contents: read
     env:
       DEV_HUB_DJANGO_SECRET: ${{ secrets.DEV_HUB_DJANGO_SECRET }}
-      DEV_HUB_DEBUG: ${{ secrets.DEV_HUB_DEBUG }}
+      DEV_HUB_DEBUG: true
       DEV_HUB_ALLOWED_HOSTS: localhost,127.0.0.1
-      ACCEPTANCE_TEST_SERVER_URL: http://localhost:8000
+      ACCEPTANCE_TEST_SERVER_URL: https://localhost
+      DOMAIN: localhost
+      DEV_HUB_HOST: localhost
+      DEV_HUB_PORT: 443
+      DEV_HUB_SSL_LIVE_DIR: ./.certs/live/localhost
+      DEV_HUB_SSL_ARCHIVE_DIR: ./.certs/archive/localhost
+      DEV_HUB_SSL_KEYS_DIR: ./.certs/keys
+      PLAYWRIGHT_IGNORE_HTTPS_ERRORS: true
 
     steps:
       - name: Checkout code
@@ -35,15 +42,48 @@ jobs:
       - name: Ensure browsers are installed
         run: python -m playwright install --with-deps
 
+      - name: Generate Self Signed Certificate
+        run: |
+          mkdir -p ./.certs/live/localhost
+          mkdir -p ./.certs/archive/localhost
+          mkdir -p ./.certs/keys
+          openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+            -keyout ./.certs/live/localhost/privkey.pem \
+            -out ./.certs/live/localhost/fullchain.pem \
+            -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=localhost"
+
       - name: Create .env file locally
         run: |
-          echo "DEV_HUB_DJANGO_SECRET=${{ secrets.DEV_HUB_DJANGO_SECRET }}" > .env
-          echo "DEV_HUB_DEBUG=${{ secrets.DEV_HUB_DEBUG }}" >> .env
-          echo "DEV_HUB_ALLOWED_HOSTS=${{ vars.DEV_HUB_ALLOWED_HOSTS }}" >> .env
+          echo "DEV_HUB_DJANGO_SECRET=$DEV_HUB_DJANGO_SECRET" > .env
+          echo "DEV_HUB_DEBUG=$DEV_HUB_DEBUG" >> .env
+          echo "DEV_HUB_ALLOWED_HOSTS=$DEV_HUB_ALLOWED_HOSTS" >> .env
+          echo "DOMAIN=$DOMAIN" >> .env
+          echo "DEV_HUB_HOST=$DEV_HUB_HOST" >> .env
+          echo "DEV_HUB_PORT=$DEV_HUB_PORT" >> .env
+          echo "DEV_HUB_SSL_LIVE_DIR=$DEV_HUB_SSL_LIVE_DIR" >> .env
+          echo "DEV_HUB_SSL_ARCHIVE_DIR=$DEV_HUB_SSL_ARCHIVE_DIR" >> .env
+          echo "DEV_HUB_SSL_KEYS_DIR=$DEV_HUB_SSL_KEYS_DIR" >> .env
+          echo "ACCEPTANCE_TEST_SERVER_URL=$ACCEPTANCE_TEST_SERVER_URL" >> .env
+          echo "PLAYWRIGHT_IGNORE_HTTPS_ERRORS=$PLAYWRIGHT_IGNORE_HTTPS_ERRORS" >> .env
 
-      - name: Run Dev Server
+      - name: Run NGINX Server
         run: |
-          python manage.py runserver &
+          docker compose up -d --build
+      
+      - name: Wait for the web server to be ready (with timeout)
+        run: |
+          timeout=60  # Timeout after 60 seconds
+          elapsed=0
+          while ! curl --silent --head --fail -k $ACCEPTANCE_TEST_SERVER_URL; do
+            if [ $elapsed -ge $timeout ]; then
+              echo "Timeout reached, web server is not up after $timeout seconds."
+              exit 1  # Fail the step
+            fi
+            echo "Waiting for web server to be ready... $elapsed seconds elapsed."
+            sleep 5
+            ((elapsed+=5))
+          done
+          echo "Web server is up and running!"
       
       - name: Run Django Tests
         run: |

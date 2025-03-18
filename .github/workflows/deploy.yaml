@@ -70,6 +70,11 @@ jobs:
           echo "DEV_HUB_DEBUG=${{ secrets.DEV_HUB_DEBUG }}" >> .env
           echo "DEV_HUB_ALLOWED_HOSTS=${{ vars.DEV_HUB_ALLOWED_HOSTS }}" >> .env
           echo "DOMAIN=${{ vars.DOMAIN }}" >> .env
+          echo "DEV_HUB_HOST=${{ vars.DOMAIN }}" >> .env
+          echo "DEV_HUB_PORT=443" >> .env
+          echo "DEV_HUB_SSL_LIVE_DIR=/etc/letsencrypt/live/${{ vars.DOMAIN }}" >> .env
+          echo "DEV_HUB_SSL_ARCHIVE_DIR=/etc/letsencrypt/archive/${{ vars.DOMAIN }}" >> .env
+          echo "DEV_HUB_SSL_KEYS_DIR=/etc/letsencrypt/keys" >> .env
 
       - name: Copy .env file to EC2
         run: scp -o StrictHostKeyChecking=no -i private-key.pem .env ubuntu@${{ vars.DOMAIN }}:/home/ubuntu/dev_hub/.env

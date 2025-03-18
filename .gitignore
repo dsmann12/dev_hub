@@ -16,3 +16,6 @@ __pycache__
 
 # Django collected static files
 staticfiles
+
+# dev folders
+.certs
