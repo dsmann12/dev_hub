@@ -126,7 +126,7 @@ Resources:
           ln -s /opt/certbot/bin/certbot /usr/bin/certbot
           certbot certonly --standalone -d ${Domain} --agree-tos --email david.scheuermann3@gmail.com --non-interactive
           # Add cron job to update cert
-          echo "0 0,12 * * * root /opt/certbot/bin/python -c 'import random; import time; time.sleep(random.random() * 3600)' && sudo certbot renew -q" | sudo tee -a /etc/crontab > /dev/null
+          echo "0 0,12 * * * root sleep \$((RANDOM \% 3600)) && certbot renew -q" >> /etc/crontab
           set DOMAIN=${Domain}
       Tags:
         - Key: "Name"
