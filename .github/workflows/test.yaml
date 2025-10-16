@@ -44,13 +44,8 @@ jobs:
 
       - name: Generate Self Signed Certificate
         run: |
-          mkdir -p ./.certs/live/localhost
-          mkdir -p ./.certs/archive/localhost
-          mkdir -p ./.certs/keys
-          openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-            -keyout ./.certs/live/localhost/privkey.pem \
-            -out ./.certs/live/localhost/fullchain.pem \
-            -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=localhost"
+          chmod +x scripts/generate_local_certs.sh
+          ./scripts/generate_local_certs.sh
 
       - name: Create .env file locally
         run: |
