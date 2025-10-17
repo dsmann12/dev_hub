@@ -16,6 +16,120 @@ jobs:
       DEV_HUB_DJANGO_SECRET: ${{ secrets.DEV_HUB_DJANGO_SECRET }}
       DEV_HUB_DEBUG: true
       DEV_HUB_ALLOWED_HOSTS: localhost,127.0.0.1
+      ACCEPTANCE_TEST_SERVER_URL: http://localhost:8000
+      DOMAIN: localhost
+      DEV_HUB_HOST: localhost
+      DEV_HUB_PORT: 443
+      DEV_HUB_SSL_LIVE_DIR: ./.certs/live/localhost
+      DEV_HUB_SSL_ARCHIVE_DIR: ./.certs/archive/localhost
+      DEV_HUB_SSL_KEYS_DIR: ./.certs/keys
+      PLAYWRIGHT_IGNORE_HTTPS_ERRORS: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+      
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: dev-hub:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create .env file locally
+        run: |
+          echo "DEV_HUB_DJANGO_SECRET=$DEV_HUB_DJANGO_SECRET" > .env
+          echo "DEV_HUB_DEBUG=$DEV_HUB_DEBUG" >> .env
+          echo "DEV_HUB_ALLOWED_HOSTS=$DEV_HUB_ALLOWED_HOSTS" >> .env
+          echo "DOMAIN=$DOMAIN" >> .env
+          echo "DEV_HUB_HOST=$DEV_HUB_HOST" >> .env
+          echo "DEV_HUB_PORT=$DEV_HUB_PORT" >> .env
+          echo "DEV_HUB_SSL_LIVE_DIR=$DEV_HUB_SSL_LIVE_DIR" >> .env
+          echo "DEV_HUB_SSL_ARCHIVE_DIR=$DEV_HUB_SSL_ARCHIVE_DIR" >> .env
+          echo "DEV_HUB_SSL_KEYS_DIR=$DEV_HUB_SSL_KEYS_DIR" >> .env
+          echo "ACCEPTANCE_TEST_SERVER_URL=$ACCEPTANCE_TEST_SERVER_URL" >> .env
+          echo "PLAYWRIGHT_IGNORE_HTTPS_ERRORS=$PLAYWRIGHT_IGNORE_HTTPS_ERRORS" >> .env
+
+      - name: Run container
+        run: |
+          docker run -d --name dev-hub-test \
+            -p 8000:8000 \
+            -e DEV_HUB_DJANGO_SECRET="${{ secrets.DEV_HUB_DJANGO_SECRET }}" \
+            -e DEV_HUB_DEBUG=true \
+            -e DEV_HUB_ALLOWED_HOSTS=localhost,127.0.0.1 \
+            dev-hub:latest
+      
+      - name: Wait for the web server to be ready (with timeout)
+        run: |
+          timeout=60  # Timeout after 60 seconds
+          elapsed=0
+          while ! curl --silent --head --fail -k $ACCEPTANCE_TEST_SERVER_URL; do
+            if [ $elapsed -ge $timeout ]; then
+              echo "Timeout reached, web server is not up after $timeout seconds."
+              exit 1  # Fail the step
+            fi
+            echo "Waiting for web server to be ready... $elapsed seconds elapsed."
+            sleep 5
+            ((elapsed+=5))
+          done
+          echo "Web server is up and running!"
+      
+      - name: Install Playwright Browsers
+        run: python -m playwright install --with-deps
+      
+      - name: Run Django Tests
+        run: |
+          python manage.py test
+      
+      - name: Show container logs on failure
+        if: failure()
+        run: docker logs dev-hub-test
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker stop dev-hub-test || true
+          docker rm dev-hub-test || true
+
+
+  test-nginx:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: none
+      contents: read
+    env:
+      DEV_HUB_DJANGO_SECRET: ${{ secrets.DEV_HUB_DJANGO_SECRET }}
+      DEV_HUB_DEBUG: true
+      DEV_HUB_ALLOWED_HOSTS: localhost,127.0.0.1
       ACCEPTANCE_TEST_SERVER_URL: https://localhost
       DOMAIN: localhost
       DEV_HUB_HOST: localhost
@@ -34,18 +148,26 @@ jobs:
         with:
           python-version: '3.10'
       
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Ensure browsers are installed
-        run: python -m playwright install --with-deps
-
-      - name: Generate Self Signed Certificate
-        run: |
-          chmod +x scripts/generate_local_certs.sh
-          ./scripts/generate_local_certs.sh
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+      
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Create .env file locally
         run: |
@@ -60,8 +182,25 @@ jobs:
           echo "DEV_HUB_SSL_KEYS_DIR=$DEV_HUB_SSL_KEYS_DIR" >> .env
           echo "ACCEPTANCE_TEST_SERVER_URL=$ACCEPTANCE_TEST_SERVER_URL" >> .env
           echo "PLAYWRIGHT_IGNORE_HTTPS_ERRORS=$PLAYWRIGHT_IGNORE_HTTPS_ERRORS" >> .env
+      
+      # - name: Collect Static Files for Django
+      #   run: |
+      #     python manage.py collectstatic --noinput
+      - name: Generate Local Certs
+        run: |
+          chmod +x ./scripts/generate_local_certs.sh
+          ./scripts/generate_local_certs.sh
+        
+      - name: Build images
+        uses: docker/bake-action@v6
+        with:
+          files: docker-compose.yml
+          load: true
+          set: |
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
 
-      - name: Run NGINX Server
+      - name: Run NGINX and App Containers
         run: |
           docker compose up -d --build
       
@@ -80,7 +219,23 @@ jobs:
           done
           echo "Web server is up and running!"
       
+      - name: Install Playwright Browsers
+        run: python -m playwright install --with-deps
+      
       - name: Run Django Tests
         run: |
           python manage.py test
+      
+      - name: Show container logs on failure
+        if: failure()
+        run: |
+          echo "NGINX Logs:"
+          docker logs dev_hub-nginx-1
+          echo "Web App Logs:"
+          docker logs dev_hub-web-1
 
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down
+          docker system prune -f
