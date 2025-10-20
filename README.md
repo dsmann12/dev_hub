@@ -29,7 +29,7 @@ chmod +x scripts/generate_local_certs.sh
 
 # Build and Run The Application
 
-First, ensure you have a .env file setup as shown previously. Feel free to chage the secret.
+First, ensure you have a .env file setup as shown previously. Feel free to change the secret.
 
 ```bash
 docker compose up -d --build
