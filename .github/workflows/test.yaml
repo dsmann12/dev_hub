@@ -17,7 +17,7 @@ jobs:
       DEV_HUB_DEBUG: true
       DEV_HUB_ALLOWED_HOSTS: localhost,127.0.0.1
       ACCEPTANCE_TEST_SERVER_URL: http://localhost:8000
-      DOMAIN: localhos
+      DOMAIN: localhost
       DEV_HUB_HOST: localhost
       DEV_HUB_PORT: 443
       DEV_HUB_SSL_LIVE_DIR: ./.certs/live/localhost

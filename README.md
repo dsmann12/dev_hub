@@ -5,7 +5,7 @@ I want this to replace my old personal website.
 
 # Environment variables
 
-The application needs to following environment variables based on this env file example:
+The application needs the following environment variables based on this env file example:
 
 ```
 DEV_HUB_DJANGO_SECRET=secret_example
