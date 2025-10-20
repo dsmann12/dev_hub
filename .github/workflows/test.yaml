@@ -17,7 +17,7 @@ jobs:
       DEV_HUB_DEBUG: true
       DEV_HUB_ALLOWED_HOSTS: localhost,127.0.0.1
       ACCEPTANCE_TEST_SERVER_URL: http://localhost:8000
-      DOMAIN: localhost
+      DOMAIN: localhos
       DEV_HUB_HOST: localhost
       DEV_HUB_PORT: 443
       DEV_HUB_SSL_LIVE_DIR: ./.certs/live/localhost
@@ -183,9 +183,6 @@ jobs:
           echo "ACCEPTANCE_TEST_SERVER_URL=$ACCEPTANCE_TEST_SERVER_URL" >> .env
           echo "PLAYWRIGHT_IGNORE_HTTPS_ERRORS=$PLAYWRIGHT_IGNORE_HTTPS_ERRORS" >> .env
       
-      # - name: Collect Static Files for Django
-      #   run: |
-      #     python manage.py collectstatic --noinput
       - name: Generate Local Certs
         run: |
           chmod +x ./scripts/generate_local_certs.sh
@@ -202,7 +199,7 @@ jobs:
 
       - name: Run NGINX and App Containers
         run: |
-          docker compose up -d --build
+          docker compose up -d
       
       - name: Wait for the web server to be ready (with timeout)
         run: |
