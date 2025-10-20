@@ -8,14 +8,14 @@ I want this to replace my old personal website.
 The application needs the following environment variables based on this env file example:
 
 ```
-DEV_HUB_DJANGO_SECRET=secret_example
-DEV_HUB_DEBUG=true
-DEV_HUB_ALLOWED_HOSTS=localhost,127.0.0.1
+PORTFOLIO_DJANGO_SECRET=secret_example
+PORTFOLIO_DEBUG=true
+PORTFOLIO_ALLOWED_HOSTS=localhost,127.0.0.1
 DOMAIN=localhost
-DEV_HUB_PORT=8000
-DEV_HUB_SSL_LIVE_DIR=./.certs/live/localhost
-DEV_HUB_SSL_ARCHIVE_DIR=./.certs/archive/localhost
-DEV_HUB_SSL_KEYS_DIR=./.certs/keys
+PORTFOLIO_PORT=8000
+PORTFOLIO_SSL_LIVE_DIR=./.certs/live/localhost
+PORTFOLIO_SSL_ARCHIVE_DIR=./.certs/archive/localhost
+PORTFOLIO_SSL_KEYS_DIR=./.certs/keys
 ```
 
 # Generate Local Certs for Full Local Deployment

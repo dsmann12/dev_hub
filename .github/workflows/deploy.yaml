@@ -29,14 +29,14 @@ jobs:
 
       # Setup tags and labels for Docker image
       # Will create the following tags:
-      # - yourname/dev-hub:main
-      # - yourname/dev-hub:main-a1b2c3d
-      # - yourname/dev-hub:latest (if on default branch)
+      # - yourname/portfolio:main
+      # - yourname/portfolio:main-a1b2c3d
+      # - yourname/portfolio:latest (if on default branch)
       - name: Extract metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/dev-hub
+          images: ${{ secrets.DOCKER_USERNAME }}/portfolio
           tags: |
             type=ref,event=branch
             type=sha,prefix={{branch}}-

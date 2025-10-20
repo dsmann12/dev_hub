@@ -5,9 +5,9 @@ services:
       - .:/app
       - ./staticfiles:/app/staticfiles  # Mount static files
     environment:
-      DEV_HUB_DJANGO_SECRET: ${DEV_HUB_DJANGO_SECRET}
-      DEV_HUB_DEBUG: ${DEV_HUB_DEBUG}
-      DEV_HUB_ALLOWED_HOSTS: ${DEV_HUB_ALLOWED_HOSTS}
+      PORTFOLIO_DJANGO_SECRET: ${PORTFOLIO_DJANGO_SECRET}
+      PORTFOLIO_DEBUG: ${PORTFOLIO_DEBUG}
+      PORTFOLIO_ALLOWED_HOSTS: ${PORTFOLIO_ALLOWED_HOSTS}
     restart: always
 
   nginx:
@@ -16,21 +16,21 @@ services:
       DOMAIN: ${DOMAIN}
     ports:
       - 80:80
-      - ${DEV_HUB_PORT}:443
+      - ${PORTFOLIO_PORT}:443
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/templates:/etc/nginx/templates
       - ./staticfiles:/app/staticfiles  # Serve collected static files
-      - ${DEV_HUB_SSL_LIVE_DIR}:/etc/letsencrypt/live/${DOMAIN}:ro
-      - ${DEV_HUB_SSL_ARCHIVE_DIR}:/etc/letsencrypt/archive/${DOMAIN}:ro
-      - ${DEV_HUB_SSL_KEYS_DIR}:/etc/letsencrypt/keys:ro
+      - ${PORTFOLIO_SSL_LIVE_DIR}:/etc/letsencrypt/live/${DOMAIN}:ro
+      - ${PORTFOLIO_SSL_ARCHIVE_DIR}:/etc/letsencrypt/archive/${DOMAIN}:ro
+      - ${PORTFOLIO_SSL_KEYS_DIR}:/etc/letsencrypt/keys:ro
     depends_on:
       - web
     restart: always
   
 networks:
   default:
-    name: dev_hub
+    name: portfolio
 
 volumes:
   static_volume:
