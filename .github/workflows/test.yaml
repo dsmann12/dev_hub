@@ -13,16 +13,16 @@ jobs:
       id-token: none
       contents: read
     env:
-      DEV_HUB_DJANGO_SECRET: ${{ secrets.DEV_HUB_DJANGO_SECRET }}
-      DEV_HUB_DEBUG: true
-      DEV_HUB_ALLOWED_HOSTS: localhost,127.0.0.1
+      PORTFOLIO_DJANGO_SECRET: ${{ secrets.PORTFOLIO_DJANGO_SECRET }}
+      PORTFOLIO_DEBUG: true
+      PORTFOLIO_ALLOWED_HOSTS: localhost,127.0.0.1
       ACCEPTANCE_TEST_SERVER_URL: http://localhost:8000
       DOMAIN: localhost
-      DEV_HUB_HOST: localhost
-      DEV_HUB_PORT: 443
-      DEV_HUB_SSL_LIVE_DIR: ./.certs/live/localhost
-      DEV_HUB_SSL_ARCHIVE_DIR: ./.certs/archive/localhost
-      DEV_HUB_SSL_KEYS_DIR: ./.certs/keys
+      PORTFOLIO_HOST: localhost
+      PORTFOLIO_PORT: 443
+      PORTFOLIO_SSL_LIVE_DIR: ./.certs/live/localhost
+      PORTFOLIO_SSL_ARCHIVE_DIR: ./.certs/archive/localhost
+      PORTFOLIO_SSL_KEYS_DIR: ./.certs/keys
       PLAYWRIGHT_IGNORE_HTTPS_ERRORS: true
 
     steps:
@@ -60,33 +60,33 @@ jobs:
         with:
           context: .
           push: false
-          tags: dev-hub:latest
+          tags: portfolio:latest
           load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Create .env file locally
         run: |
-          echo "DEV_HUB_DJANGO_SECRET=$DEV_HUB_DJANGO_SECRET" > .env
-          echo "DEV_HUB_DEBUG=$DEV_HUB_DEBUG" >> .env
-          echo "DEV_HUB_ALLOWED_HOSTS=$DEV_HUB_ALLOWED_HOSTS" >> .env
+          echo "PORTFOLIO_DJANGO_SECRET=$PORTFOLIO_DJANGO_SECRET" > .env
+          echo "PORTFOLIO_DEBUG=$PORTFOLIO_DEBUG" >> .env
+          echo "PORTFOLIO_ALLOWED_HOSTS=$PORTFOLIO_ALLOWED_HOSTS" >> .env
           echo "DOMAIN=$DOMAIN" >> .env
-          echo "DEV_HUB_HOST=$DEV_HUB_HOST" >> .env
-          echo "DEV_HUB_PORT=$DEV_HUB_PORT" >> .env
-          echo "DEV_HUB_SSL_LIVE_DIR=$DEV_HUB_SSL_LIVE_DIR" >> .env
-          echo "DEV_HUB_SSL_ARCHIVE_DIR=$DEV_HUB_SSL_ARCHIVE_DIR" >> .env
-          echo "DEV_HUB_SSL_KEYS_DIR=$DEV_HUB_SSL_KEYS_DIR" >> .env
+          echo "PORTFOLIO_HOST=$PORTFOLIO_HOST" >> .env
+          echo "PORTFOLIO_PORT=$PORTFOLIO_PORT" >> .env
+          echo "PORTFOLIO_SSL_LIVE_DIR=$PORTFOLIO_SSL_LIVE_DIR" >> .env
+          echo "PORTFOLIO_SSL_ARCHIVE_DIR=$PORTFOLIO_SSL_ARCHIVE_DIR" >> .env
+          echo "PORTFOLIO_SSL_KEYS_DIR=$PORTFOLIO_SSL_KEYS_DIR" >> .env
           echo "ACCEPTANCE_TEST_SERVER_URL=$ACCEPTANCE_TEST_SERVER_URL" >> .env
           echo "PLAYWRIGHT_IGNORE_HTTPS_ERRORS=$PLAYWRIGHT_IGNORE_HTTPS_ERRORS" >> .env
 
       - name: Run container
         run: |
-          docker run -d --name dev-hub-test \
+          docker run -d --name portfolio-test \
             -p 8000:8000 \
-            -e DEV_HUB_DJANGO_SECRET="${{ secrets.DEV_HUB_DJANGO_SECRET }}" \
-            -e DEV_HUB_DEBUG=true \
-            -e DEV_HUB_ALLOWED_HOSTS=localhost,127.0.0.1 \
-            dev-hub:latest
+            -e PORTFOLIO_DJANGO_SECRET="${{ secrets.PORTFOLIO_DJANGO_SECRET }}" \
+            -e PORTFOLIO_DEBUG=true \
+            -e PORTFOLIO_ALLOWED_HOSTS=localhost,127.0.0.1 \
+            portfolio:latest
       
       - name: Wait for the web server to be ready (with timeout)
         run: |
@@ -112,13 +112,13 @@ jobs:
       
       - name: Show container logs on failure
         if: failure()
-        run: docker logs dev-hub-test
+        run: docker logs portfolio-test
 
       - name: Cleanup
         if: always()
         run: |
-          docker stop dev-hub-test || true
-          docker rm dev-hub-test || true
+          docker stop portfolio-test || true
+          docker rm portfolio-test || true
 
 
   test-nginx:
@@ -127,16 +127,16 @@ jobs:
       id-token: none
       contents: read
     env:
-      DEV_HUB_DJANGO_SECRET: ${{ secrets.DEV_HUB_DJANGO_SECRET }}
-      DEV_HUB_DEBUG: true
-      DEV_HUB_ALLOWED_HOSTS: localhost,127.0.0.1
+      PORTFOLIO_DJANGO_SECRET: ${{ secrets.PORTFOLIO_DJANGO_SECRET }}
+      PORTFOLIO_DEBUG: true
+      PORTFOLIO_ALLOWED_HOSTS: localhost,127.0.0.1
       ACCEPTANCE_TEST_SERVER_URL: https://localhost
       DOMAIN: localhost
-      DEV_HUB_HOST: localhost
-      DEV_HUB_PORT: 443
-      DEV_HUB_SSL_LIVE_DIR: ./.certs/live/localhost
-      DEV_HUB_SSL_ARCHIVE_DIR: ./.certs/archive/localhost
-      DEV_HUB_SSL_KEYS_DIR: ./.certs/keys
+      PORTFOLIO_HOST: localhost
+      PORTFOLIO_PORT: 443
+      PORTFOLIO_SSL_LIVE_DIR: ./.certs/live/localhost
+      PORTFOLIO_SSL_ARCHIVE_DIR: ./.certs/archive/localhost
+      PORTFOLIO_SSL_KEYS_DIR: ./.certs/keys
       PLAYWRIGHT_IGNORE_HTTPS_ERRORS: true
 
     steps:
@@ -171,15 +171,15 @@ jobs:
 
       - name: Create .env file locally
         run: |
-          echo "DEV_HUB_DJANGO_SECRET=$DEV_HUB_DJANGO_SECRET" > .env
-          echo "DEV_HUB_DEBUG=$DEV_HUB_DEBUG" >> .env
-          echo "DEV_HUB_ALLOWED_HOSTS=$DEV_HUB_ALLOWED_HOSTS" >> .env
+          echo "PORTFOLIO_DJANGO_SECRET=$PORTFOLIO_DJANGO_SECRET" > .env
+          echo "PORTFOLIO_DEBUG=$PORTFOLIO_DEBUG" >> .env
+          echo "PORTFOLIO_ALLOWED_HOSTS=$PORTFOLIO_ALLOWED_HOSTS" >> .env
           echo "DOMAIN=$DOMAIN" >> .env
-          echo "DEV_HUB_HOST=$DEV_HUB_HOST" >> .env
-          echo "DEV_HUB_PORT=$DEV_HUB_PORT" >> .env
-          echo "DEV_HUB_SSL_LIVE_DIR=$DEV_HUB_SSL_LIVE_DIR" >> .env
-          echo "DEV_HUB_SSL_ARCHIVE_DIR=$DEV_HUB_SSL_ARCHIVE_DIR" >> .env
-          echo "DEV_HUB_SSL_KEYS_DIR=$DEV_HUB_SSL_KEYS_DIR" >> .env
+          echo "PORTFOLIO_HOST=$PORTFOLIO_HOST" >> .env
+          echo "PORTFOLIO_PORT=$PORTFOLIO_PORT" >> .env
+          echo "PORTFOLIO_SSL_LIVE_DIR=$PORTFOLIO_SSL_LIVE_DIR" >> .env
+          echo "PORTFOLIO_SSL_ARCHIVE_DIR=$PORTFOLIO_SSL_ARCHIVE_DIR" >> .env
+          echo "PORTFOLIO_SSL_KEYS_DIR=$PORTFOLIO_SSL_KEYS_DIR" >> .env
           echo "ACCEPTANCE_TEST_SERVER_URL=$ACCEPTANCE_TEST_SERVER_URL" >> .env
           echo "PLAYWRIGHT_IGNORE_HTTPS_ERRORS=$PLAYWRIGHT_IGNORE_HTTPS_ERRORS" >> .env
       
@@ -227,9 +227,9 @@ jobs:
         if: failure()
         run: |
           echo "NGINX Logs:"
-          docker logs dev_hub-nginx-1
+          docker logs portfolio-nginx-1
           echo "Web App Logs:"
-          docker logs dev_hub-web-1
+          docker logs portfolio-web-1
 
       - name: Cleanup
         if: always()

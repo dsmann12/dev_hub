@@ -43,7 +43,7 @@ Resources:
               StringEquals:
                 "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
               StringLike:
-                "token.actions.githubusercontent.com:sub": "repo:dsmann12/dev_hub:*"
+                "token.actions.githubusercontent.com:sub": "repo:dsmann12/portfolio:*"
       Policies:
         - PolicyName: GithubActionsDeployPolicy
           PolicyDocument:
